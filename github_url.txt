@@ -1,5 +1,5 @@
 https://github.com/kmj7475/project_node
-
+J3-UAhhDD$5TBh
 1조 vite
 2조 vue-cli
 
@@ -89,9 +89,9 @@ app.use((req, res) => {
 
 14. 이제 잘 작동 될 것이다. 이제 주의사항을 알려주겟다.
 앵간하면 서버에서 모든 처리를 해라.
-1. 뷰는 화면을 만드는 프레임워크다
-2. 얘는 궁극적으로 서버에 흡수가 되어야된다.
-3. 서버와 뷰가 함께 움직일 수 있도록 작업을 해야한다.
+14-1. 뷰는 화면을 만드는 프레임워크다
+14-2. 얘는 궁극적으로 서버에 흡수가 되어야된다.
+14-3. 서버와 뷰가 함께 움직일 수 있도록 작업을 해야한다.
 리액트나 다른 프레임워크를 사용할때도 마찬가지이니까 잘 기억해둬라
 
 15. outDir라는 애는 내보낼때 경로를 지정해준다. 나중에 해보셈
@@ -103,3 +103,315 @@ ex)root@211.188.55.64
 ex)211.188.55.64 <- 이렇게해도 상관없는데 보통 root로 접근을 하니까 이렇게 박아놓는거임
 
 17. 이제 서버관리및 설정변경에서 pem넣고 비번확인한다음에 넣어주고 no를 갈겨주자
+이제 깃허브에 레파지토리 주스롤 가지고와서 켜진 곳에 
+git clone https://github.com/sun88110/build_study.git 을 갈겨주자
+해당 레파지토리에 들어오면 ls 눌러서 검사해봐
+그리고 백엔드로가서 npm install을 하면 npm not found가 뜰거야
+node부터 다시처음부터 설정해줘야된단다
+주소링크의 5번 문항에 있단다
+그거 하는데, 
+nvm install 22.14.0이놈쓰지말고 
+nvm install 22.21.1라는 놈으로 써야될거임 근데 매번 확인을해 
+node.js 검색해서 거기 다운로드 들어가면 버전이 뭐있는지 볼 수 있어
+LTS는 롱-텀-서비스야 그래서 오~래 지원해준다는 버전임
+nvm install 24.11.1(LTS)보통 이거 써라 최신꺼 근데 25버전 LTS쓰면 25버전쓰고 앞으로도
+나올떄마다 버전 확인해서 써라
+이후 npm install을 하면
+
+18. 잘 작동된다 이제 node app.js. prod를 다시 해보자
+3000이 나온다면 공인 ip를 사용해서 해보자
+http://211.188.55.64:3000/
+그러고 접속하면 작동이 안되는데 네이버 클라우드 ACG로 가서 ACG 설정을 누른다음 
+일단 myip로 등록해서 적용해라
+그러고나면 http://211.188.55.64:3000 으로 들어가라
+잘되지
+
+19. 근데 문제가 있어 컴퓨터끄면 작동안됨 이건 아주 큰일이다
+이때 하는게 PM2다
+6번으로 가라
+거기가면 되늰데 보통 자바스크립트는
+싱글 스레드로 1개의 일을 수행하는데
+이 싱글PM2는 CPU에 성능만큼 싱글스레드를 여러개 생성해버림
+가게 1 가게 2가 있어 근데 가게 1 에는 1명 가게 2에는 5명이 있는데
+가게 1에 있는 1명이 가게 안에 같은 가게를 5개 차려서 같은 효율을 내는거임
+로드밸런싱은 요청이 들어올때마다 놀고있는 곳으로 분배함
+
+20. mobaXterm실행한후에  npm install pm2 -g를 쳐라 
+설치가 완료되면 이제 백엔드로가서 
+pm2 start app.js -- name app를 해봐라  - 1개만 실행함 
+그러면 니 스레드가 몇갠지 나온다
+pm2 start app.js --watch -i 2를 실행해봐라  - 2개만 실행함
+pm2 kill로 프로세스삭제
+pm2 stop 프로세스 중지
+pm2 log 버그가 터진게 없는지 로그를 볼수있음
+pm2 list로 뭐가 실행중인지 볼 수 있따
+이제 모바엑스텀을 꺼도 접속이 가능함
+
+21. github action에 대해 알아보자
+Web Server - 정적인 파일 처리
+                     +
+Web Application Server - 동적인 파일 처리 (WAS)
+
+WAS는 웹서버보다 느림 그래서 그냥 웹서버에서 들고있따가 와스가 요청하면 걍 던짐
+
+그래서
+$ sudo apt update
+$ sudo apt install nginx
+$ nginx -v 해주고
+설치가 끝나면 에러가 날텐데
+그건 nginx의 기본세팅 떄문에 그러하다
+sudo vi /etc/nginx/sites-available/default 이놈을 써주면 기본 세팅이 된다
+
+근데 들어가면 뭔가 주우욱 뜰텐데 가장위에 
+listen 80 default_server, 로케이션을 제외한
+전부다 주석처리를하고 
+        access_log /var/log/nginx/reverse-access.log;
+        error_log /var/log/nginx/reverse-error.log;를 넣어주자
+그리고 nginx에 로그가 올 수 있도록       
+ location / {
+                    proxy_pass http://127.0.0.1:3000;
+       }를 해주자
+
+ACG에서 인바운드 규칙에 0.0.0.0/0 80 추가
+
+sudo systemctl restart nginx
+sudo systemctl status nginx
+
+볼려면 cat/var/log/nginx/reverse-access.log
+
+22. 깃허브 액션 (CI/CD)  quickstart 따라하기
+1. 워크플로 만들기
+2. 주소설장 .github/workflows/@.yml <- 숨김파일 주소 절대값이라 안바뀜
+성공적으로 됐다면 오른쪽 마켓플레이스가 뜰꺼임
+사실 그게 중요한게아니라
+3. 아래 있는놈 가져다 붙히고 커밋 풀
+name: GitHub Actions Demo
+run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+on: [push]
+jobs:
+  Explore-GitHub-Actions:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+      - name: Check out repository code
+        uses: actions/checkout@v5
+      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+      - run: echo "🍏 This job's status is ${{ job.status }}."
+4. 그러고 난뒤에 헤더에 액션스로 들어가서
+생선된 액션스 클릭하면 안에서 갖고놀수있는 블럭으로
+버튼이 있음 그걸 눌러보셈 
+5. 그럼 뭔가 쭉 나올텐데 그게 지금 깃허브 액션으로
+작업한 것들이 나올것이다.
+6. 워크플로어는 하나의 레파지토리에 여러개로 작동이 가능하다
+6-1 번외 : 만약 공격당햇다는 메일이 연속으로 들어온다면
+21번의 코드변경 작업에 ssh의 포트를 찾아서
+22로 되어있는걸 다른걸로 바꾸고
+AGC의 인바운드 규칙을 추가해라
+7. 깃허브액션에서 중요한건 3가지
+워크 플로어는
+jobs와 steps로 나눠지는데
+jobs가 회원가입 이라면
+steps는 전 작업의 결과 데이터를 기반으로
+기능을 만드는 것이다
+8. yml잘 쓸려면 들여쓰기 잘해라
+on 이라는 놈이 있는데 그놈이 뭘하면 작동하는지 정하는것임 [커밋,풀,푸시 등]
+복붙한것의 잡스 밑에 줄을 보면
+그 놈이 해당 워크 플로어의 이름이다
+기본적으로 잡스는 서버가 있다
+이름 안에 들어가이씀 따라서 잡스는 이름선언은 상관없다
+보통 우분투로 실행하면 될꺼야, 그 우분투 코드 밑에 steps가 있는데
+run - uses - name으로 되어있는데
+run = 스크립트 명령어 실행
+uses = 등록되어있는 모듈(actions)을 사용할 때 사용
+local에 있는 vscode의 작업물을
+Repogitory에 푸시할껀데
+그안에 있는 workflows가 같이 내려받는데
+이제 그 정보를 NCP넘기는데 이 놈이 build를
+못하는 애임 그래서 죽어버리는데 이걸 고치기위해
+workflows에서 vue build를 해서
+가장 먼저 ubuntu에게 던져주고 
+거기 step 4개가 있는데 거기서
+첫번째로 git clone을 해
+두번째로 vue build를 해
+세번째로 SCP vue 결과물 생성
+가장 중요한 4번째로
+SSH 기반으로 NCP에 접근해서 
+NCP에 명령어 전송
+그 뒤에 NCP에서 푸쉬 내용을 업데이트를 함
+
+9. 깃허브에서 ssh 접속시 사용할 키를 생성해서
+등록해야한다 cmd에 
+ssh-keygen -t rsa -b 4096 -C "github-action"
+cd .ssh에가서 dir 하면 
+id_rsa가 두개 생성됐을낀데
+notepad id_rsa.pub 복붙
+mobaxtem을 켜서 거기 들어가고 sudo vi ~/.shh/authorized_keys
+안에 notepad id_rsa.pub  내용 넣어주기 i -> 복붙 -> :wq
+
+10. 옆에 디렉토리 구역 왼쪽
+즐찾아이콘 누르고 
+실행중인 서버 우클릭후 edit sesstion
+어드밴스드 ssh 세팅스에 use private key에
+cmd 키고 cd .ssh경로를 찾아 들어가서
+ rsa 파일을 찾아넣어줘라 그리고 다시 키면
+비번 묻지않고 바로 드러감
+#이 세팅을 사용할땐 key관리 잘해줘라
+
+11. 본격적으로 작업하기전에 워크플로어 세팅
+name: Remote Node App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3.3.0
+
+      - name: execute remote ssh
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }} <- {{ 변수 }} 등록해줘야한다
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            whoami
+
+깃허브가서 settings에 가면 왼쪽하단에
+Secrets and variables 라는 놈이 있다
+ 그 밑에 Actions가 있음
+그 놈 안에 들어가면 Environment secrets랑
+Repository secrets가 있는데 
+Repository secrets에
+생성할것임 
+위에 변수들을 등록해주자 
+각각 4개만들어야됨
+SSH_HOST = 211.188.55.64(
+SSH_PORT = 22
+SSH_USER = root
+SSH_PRIVATE_KEY =
+cmd에 C:\Users\admin\.ssh>notepad id_rsa
+넣고 안에꺼 복붙 ㄱㄱ
+
+이제 헤더에 Code 들어가서 add code에
+.github/workflows/ssh_remote_test.yml
+만들어서 11. 코드 복붙하고
+커밋(자동으로 할당됨)
+이거하고나면 Actions에 들어가면 하나 새로 생기고
+녹색붙 들어와있으면 정상 자동임
+제대로 확인할려면 그안에 들어가서
+블록 누르고 들어가면 안에 상세로그내역에서
+execute romote ssh에 가장 아래
+✅ Successfully executed commands to all hosts.
+녹색으로 되있으면 됨
+
+
+12. 우리는 아래 코드를 기반으로 할거임
+일단 권교수님이 배포한
+deploy_project.yaml라는 제목인데 바꿔
+name: Build Vue and Deploy Node App
+
+on:
+  push:
+    branches:
+      - main 
+
+#on:
+#  pull_request:
+#    types: [closed]
+#    branches:
+#      - main
+          
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 임시 서버인 ubuntu-latest 에 현재 git repository 정보 반영
+    - name: Checkout repository
+      uses: actions/checkout@v5
+
+    # 임시 서버인 ubuntu-latest 에 node를 설치
+    - name: Setup Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version: '22'
+
+    # 임시 서버인 ubuntu-latest 에 client 폴더 안에서 지정한 명령어 수행
+    - name: Build Vue app
+      working-directory: client
+      run: |
+        npm ci --no-audit --no-fund
+        npm run build
+        
+    # github actions 에 저장된 private key를 ubuntu에 복사
+    - name: Setup SSH key
+      run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+    # 서버에 접속하여 배포 실행          
+    - name: SSH into server and deploy
+      run: |
+        scp   -r -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -P ${{ secrets.SSH_PORT }} client/dist/* ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/${{ secrets.SSH_USER }}/deploy_project/server/public/
+        ssh -vvv -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }}  ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            cd ~/deploy_project
+            git pull origin main
+            cd server
+            npm ci --no-audit --no-fund
+            pm2 restart app || pm2 start app.js --name "app"
+            pm2 save
+          EOF
+
+        echo '== build end ==='
+        
+pull_request를 기반으로 작업을 할꺼면
+주석 풀고하면됨 위 코드를 실제로 사용할
+워크플로우임 저대로 가지고가면 무조껀 실패함
+프로젝트에 맞게 수정을 해야된다
+
+13. 임시 서버는 전부 새로 해야됨
+22번줄 uses: actions/checkout@v5랑 
+25번줄 uses: actions/setup-node@v6
+27번줄        node-version: '22'버전
+이제부터 진짜 문제가 생김
+31번줄 working-directory: client <-이놈을 일단 예제파일에 맞게 frontapp으로 수정해
+33번줄 npm ci --no-audit --no-fund에 있는
+--no-audit --no-fund를 지워라 일단 필요없음
+여기서 패키지lock.json이 없으면 npm i를쓰고 있다면 npm ci를 써라 
+그리고 32번줄에 run :은 보통 1줄만되는데 |를 세우면 여러개를 할 수 있다
+36번줄 키값을 복사하는것이다
+43번줄 scp라는건 작은 규모의 파일을 이동시킬때 사용한다
+이때 주의해야되는건 key를 사용해서 
+무슨 port로 들어가서 어느파일을 어디에 넣을지인데
+client/dist/* 이놈으로 시작해서 
+${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/${{ secrets.SSH_USER }}/deploy_project/server/public/
+여기까지 간다 간단하게 말해서 그냥 root@ 니 ip  로 간다
+그래서 이걸 수정을 해야되는데 너희는 지 금 client란게 없어
+그래서 갖고있는 파일인 frontapp으로할꺼야
+그리고 니 폴더밑에있는 server가 없으니까
+backend로 바꾸고 즉
+46번 줄은 scp   -r -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -P ${{ secrets.SSH_PORT }} frontapp/dist/* ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/${{ secrets.SSH_USER }}/deploy_project/backend/public/
+여기파일에서는 이렇게 하고
+50번줄에 마찬가지로 cd backend로 수정하고
+51번줄 npm ci 로 바꿔 --no-audit --no-fund이놈 있을텐데 빼
+52번줄에그리고 세팅에서 햇던 prod를 추가하면
+pm2 restart app || pm2 start app.js --name "app" -- prod로해
+
+성공하면
+node -v
+모바엑스텀에 버전확인후 
+sudo ln -s "$NVM_DIR/versions/node/v22.21.1/bin/node" "/usr/local/bin/node"
+sudo ln -s "$NVM_DIR/versions/node/v22.21.1/bin/npm" "/usr/local/bin/npm"
+sudo ln -s "$NVM_DIR/versions/node/v22.21.1/bin/pm2" "/usr/local/bin/pm2"
